@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">GeoWeather</string>
+    <string name="title_itemweather_detail">ItemWeather Detail</string>
+
+    <string name="api_key">73ba2f09dda87ee94615c854a8db1a7c</string>
+
+    <string name="ok">Ok</string>
+    <string name="cancel">Cancel</string>
+    <string name="discard">Discard</string>
+    <string name="alert">Alert</string>
+    <string name="failure">Failure</string>
+    <string name="gpssettings">GPS Settings</string>
+    <string name="gps_not_enabled">GPS is not enabled.So please enable GPS for better Location.</string>
+    <string name="settings">Settings</string>
+    <string name="unable_to_fetch_your_current_location">Unable to fetch your current location.</string>
+</resources>
