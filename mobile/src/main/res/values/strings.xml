@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">GeoWeather</string>
     <string name="title_itemweather_detail">ItemWeather Detail</string>
+    <string name="action_share">Share</string>
 
     <string name="api_key">73ba2f09dda87ee94615c854a8db1a7c</string>
 

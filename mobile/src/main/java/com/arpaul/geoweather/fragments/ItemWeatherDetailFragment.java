@@ -1,11 +1,17 @@
 package com.arpaul.geoweather.fragments;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.graphics.Typeface;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.view.MenuItemCompat;
+import android.support.v7.widget.ShareActionProvider;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -32,7 +38,10 @@ public class ItemWeatherDetailFragment extends Fragment {
 
     private TextView tvDayTitle, tvDayDate, tvDayTempMax, tvDayTempMin, tvDayHumidity, tvDayWind, tvDayPressure, tvDayWeather;
     private TextView tvPressure, tvWind, tvHumidity;
-    private ImageView ivDayWeather;
+    private ImageView ivDayWeather, ivShare;
+    private ShareActionProvider mShareActionProvider;
+    private String mForecast;
+    private static final String FORECAST_SHARE_HASHTAG = " #SunshineApp";
     /**
      * The fragment argument representing the item ID that this fragment
      * represents.
@@ -97,8 +106,39 @@ public class ItemWeatherDetailFragment extends Fragment {
             String icon = (String) objWeatherDO.arrWeatheDescp.get(0).getData(WeatherDescriptionDO.WEATHER_DESC_DATA.TYPE_ICON);
             ivDayWeather.setImageResource(AppConstants.getArtResourceForWeatherCondition(StringUtils.getInt(icon)));
         }
+
+        ivShare.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                createShareForecastIntent();
+            }
+        });
     }
 
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        inflater.inflate(R.menu.detailfragment, menu);
+
+        // Retrieve the share menu item
+        MenuItem menuItem = menu.findItem(R.id.action_share);
+
+        // Get the provider and hold onto it to set/change the share intent.
+        mShareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(menuItem);
+
+        // If onLoadFinished happens before this, we can go ahead and set the share intent now.
+        if (mForecast != null) {
+            mShareActionProvider.setShareIntent(createShareForecastIntent());
+        }
+    }
+
+    private Intent createShareForecastIntent() {
+        Intent shareIntent = new Intent(Intent.ACTION_SEND);
+        shareIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
+        shareIntent.setType("text/plain");
+        shareIntent.putExtra(Intent.EXTRA_TEXT, mForecast + FORECAST_SHARE_HASHTAG);
+        return shareIntent;
+    }
 
     @Override
     public void onResume() {
@@ -149,6 +189,7 @@ public class ItemWeatherDetailFragment extends Fragment {
         tvHumidity      = (TextView) rootView.findViewById(R.id.tvHumidity);
 
         ivDayWeather    = (ImageView) rootView.findViewById(R.id.ivDayWeather);
+        ivShare         = (ImageView) rootView.findViewById(R.id.ivShare);
 
         ((BaseActivity)getActivity()).applyTypeface(((BaseActivity)getActivity()).getParentView(rootView), ((BaseActivity)getActivity()).tfMyriadProRegular , Typeface.NORMAL);
     }
