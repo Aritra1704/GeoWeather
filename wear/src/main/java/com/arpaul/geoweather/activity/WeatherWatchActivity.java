@@ -17,7 +17,7 @@ import com.google.android.gms.wearable.Wearable;
 /**
  * Created by ARPaul on 17-09-2016.
  */
-public class WeatherWatch extends Activity implements
+public class WeatherWatchActivity extends Activity implements
         GoogleApiClient.OnConnectionFailedListener,
         GoogleApiClient.ConnectionCallbacks {
 
