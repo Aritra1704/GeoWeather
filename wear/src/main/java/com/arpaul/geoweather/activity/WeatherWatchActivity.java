@@ -1,11 +1,17 @@
 package com.arpaul.geoweather.activity;
 
 import android.app.Activity;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.wearable.view.DotsPageIndicator;
+import android.support.wearable.view.GridViewPager;
+import android.view.View;
+import android.view.WindowInsets;
 
 import com.arpaul.geoweather.R;
+import com.arpaul.geoweather.adapter.GridPagerAdapter;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
@@ -22,12 +28,14 @@ public class WeatherWatchActivity extends Activity implements
         GoogleApiClient.ConnectionCallbacks {
 
     GoogleApiClient mGoogleApiClient;
+    private GridViewPager pager;
+    private DotsPageIndicator page_indicator;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.activity_weather_watch);
+        setContentView(R.layout.activity_main);
 
         initialiseControls();
 
@@ -41,6 +49,31 @@ public class WeatherWatchActivity extends Activity implements
                 .addOnConnectionFailedListener(this)
                 .build();
 
+        final Resources res = getResources();
+        pager.setOnApplyWindowInsetsListener(new View.OnApplyWindowInsetsListener() {
+            @Override
+            public WindowInsets onApplyWindowInsets(View v, WindowInsets insets) {
+                final boolean round = insets.isRound();
+                int rowMargin = res.getDimensionPixelOffset(R.dimen.margin_100);
+                int colMargin = res.getDimensionPixelOffset(round ? R.dimen.margin_50 : R.dimen.margin_10);
+                pager.setPageMargins(rowMargin, colMargin);
+
+                // GridViewPager relies on insets to properly handle
+                // layout for round displays. They must be explicitly
+                // applied since this listener has taken them over.
+                pager.onApplyWindowInsets(insets);
+                return insets;
+            }
+        });
+
+        pager.setAdapter(new GridPagerAdapter(this, getFragmentManager()));
+        DotsPageIndicator dotsPageIndicator = (DotsPageIndicator) findViewById(R.id.page_indicator);
+        dotsPageIndicator.setPager(pager);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
         mGoogleApiClient.connect();
     }
 
@@ -80,6 +113,8 @@ public class WeatherWatchActivity extends Activity implements
     }
 
     private void initialiseControls(){
+        page_indicator = (DotsPageIndicator) findViewById(R.id.page_indicator);
+        pager = (GridViewPager) findViewById(R.id.pager);
 
     }
 }
