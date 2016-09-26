@@ -34,8 +34,6 @@
                 android:value=".activity.WeatherListActivity"/>
         </activity>
 
-
-
         <activity
             android:name=".activity.SunShineActivity"
             >
@@ -50,6 +48,8 @@
             android:authorities="com.arpaul.geoweather.dataAccess.ContentProviderHelper"
             android:exported="false"
             android:syncable="true"></provider>
+
+        <service android:name=".webServices.SendWearableDataService"/>
     </application>
 
 </manifest>

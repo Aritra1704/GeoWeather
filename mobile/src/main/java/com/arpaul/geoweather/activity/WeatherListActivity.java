@@ -26,7 +26,6 @@ import com.arpaul.geoweather.dataObjects.LocationDO;
 import com.arpaul.geoweather.dataObjects.WeatherDataDO;
 import com.arpaul.geoweather.dataObjects.WeatherDescriptionDO;
 import com.arpaul.geoweather.dataObjects.WeatherTodayDO;
-import com.arpaul.geoweather.fragments.ForecastFragment;
 import com.arpaul.geoweather.webServices.WeatherLoader;
 import com.arpaul.gpslibrary.fetchLocation.GPSCallback;
 import com.arpaul.gpslibrary.fetchLocation.GPSErrorCode;
@@ -40,9 +39,7 @@ import com.arpaul.utilitieslib.StringUtils;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.LinkedHashMap;
-import java.util.TimeZone;
 
 /**
  * An activity representing a list of Items. This activity
@@ -357,6 +354,12 @@ public class WeatherListActivity extends BaseActivity implements LoaderManager.L
 
     private void setData(ArrayList<WeatherDataDO> arrWeather){
         if(arrWeather != null && arrWeather.size() > 0){
+//            sendWearableData(arrWeather.get(0));
+
+//            Intent intent = new Intent(WeatherListActivity.this, SendWearableDataService.class);
+//            intent.putExtra("TodayWeather", arrWeather.get(0));
+//            startService(intent);
+
             for (WeatherDataDO objWeatherDO : arrWeather){
                 String date = (String) objWeatherDO.getData(WeatherDataDO.WEATHERDATA.TYPE_DATE);
                 if(date.trim().equalsIgnoreCase(CalendarUtils.getDateinPattern(CalendarUtils.DATE_FORMAT1))) {
@@ -393,6 +396,41 @@ public class WeatherListActivity extends BaseActivity implements LoaderManager.L
             }
         }
     }
+
+//    private static final String LOG_TAG = "WeatherListActivity";
+//    private void sendWearableData(WeatherDataDO objWeatherDataDO){
+//        GoogleApiClient apiClient = new GoogleApiClient.Builder(WeatherListActivity.this)
+//                .addConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks() {
+//                    @Override
+//                    public void onConnected(@Nullable Bundle bundle) {
+//                        LogUtils.infoLog(LOG_TAG, "onConnected: ");
+//                    }
+//
+//                    @Override
+//                    public void onConnectionSuspended(int i) {
+//                        LogUtils.infoLog(LOG_TAG, "onConnectionSuspended: ");
+//                    }
+//                })
+//                .addOnConnectionFailedListener(new GoogleApiClient.OnConnectionFailedListener() {
+//                    @Override
+//                    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+//                        LogUtils.infoLog(LOG_TAG, "onConnectionFailed: ");
+//                    }
+//                })
+//                .addApi(Wearable.API)
+//                .build();
+//
+//
+//        apiClient.connect();
+//
+//        PutDataMapRequest dataMap = PutDataMapRequest.create("/weather");
+//        dataMap.getDataMap().putLong(WeatherDataDO.WEATHERDATA.TYPE_DATE_MILIS + "", (long) objWeatherDataDO.getData(WeatherDataDO.WEATHERDATA.TYPE_DATE_MILIS));
+//        dataMap.getDataMap().putDouble(WeatherDataDO.WEATHERDATA.TYPE_TEMP_MAX + "", (double) objWeatherDataDO.getData(WeatherDataDO.WEATHERDATA.TYPE_TEMP_MAX));
+//        dataMap.getDataMap().putDouble(WeatherDataDO.WEATHERDATA.TYPE_TEMP_MIN + "", (double) objWeatherDataDO.getData(WeatherDataDO.WEATHERDATA.TYPE_TEMP_MIN));
+//
+//        PutDataRequest request = dataMap.asPutDataRequest();
+//        DataApi.DataItemResult dataItemResult = Wearable.DataApi.putDataItem(apiClient, request).await();
+//    }
 
     private void setTextColor(){
         if(text_pattern == AppConstants.TEXT_PATTERN_DARK){

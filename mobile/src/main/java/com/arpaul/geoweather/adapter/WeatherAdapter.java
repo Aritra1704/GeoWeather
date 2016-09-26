@@ -5,8 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Typeface;
 import android.os.Bundle;
-import android.support.v4.app.FragmentTransaction;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,12 +15,12 @@ import android.widget.TextView;
 import com.arpaul.geoweather.R;
 import com.arpaul.geoweather.activity.BaseActivity;
 import com.arpaul.geoweather.activity.ItemWeatherDetailActivity;
-import com.arpaul.geoweather.activity.WeatherDetailActivity;
 import com.arpaul.geoweather.activity.WeatherListActivity;
 import com.arpaul.geoweather.common.AppConstants;
 import com.arpaul.geoweather.dataObjects.WeatherDataDO;
 import com.arpaul.geoweather.dataObjects.WeatherDescriptionDO;
 import com.arpaul.geoweather.fragments.ItemWeatherDetailFragment;
+import com.arpaul.geoweather.webServices.SendWearableDataService;
 import com.arpaul.utilitieslib.CalendarUtils;
 import com.arpaul.utilitieslib.StringUtils;
 
@@ -71,6 +69,13 @@ public class WeatherAdapter extends RecyclerView.Adapter<WeatherAdapter.ViewHold
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                //Delete later
+                Intent intentService = new Intent(context, SendWearableDataService.class);
+                intentService.putExtra("TodayWeather", objWeatherDO);
+                ((Activity)context).startService(intentService);
+
+
                 if (((WeatherListActivity)context).mTwoPane) {
                     Bundle arguments = new Bundle();
                     arguments.putSerializable("WEATHER_DETAIL",objWeatherDO);

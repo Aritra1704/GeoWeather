@@ -12,6 +12,7 @@ import android.view.WindowInsets;
 
 import com.arpaul.geoweather.R;
 import com.arpaul.geoweather.adapter.GridPagerAdapter;
+import com.arpaul.geoweather.dataObjects.WeatherDataDO;
 import com.arpaul.geoweather.service.WatchService;
 import com.arpaul.utilitieslib.LogUtils;
 import com.google.android.gms.common.ConnectionResult;
@@ -97,8 +98,11 @@ public class WeatherWatchActivity extends Activity implements
                         DataMap dataMap = DataMapItem.fromDataItem(dataEvent.getDataItem()).getDataMap();
                         String path = dataEvent.getDataItem().getUri().getPath();
                         if(path.equals("/weather")){
-                            double high = dataMap.getDouble("high");
-                            double low = dataMap.getDouble("low");
+                            WeatherDataDO objWeatherDataDO = new WeatherDataDO();
+                            objWeatherDataDO.saveData(dataMap.getLong(WeatherDataDO.WEATHERDATA.TYPE_DATE_MILIS + ""), WeatherDataDO.WEATHERDATA.TYPE_DATE_MILIS);
+
+                            objWeatherDataDO.saveData(dataMap.getDouble(WeatherDataDO.WEATHERDATA.TYPE_TEMP_MAX + ""), WeatherDataDO.WEATHERDATA.TYPE_TEMP_MAX);
+                            objWeatherDataDO.saveData(dataMap.getDouble(WeatherDataDO.WEATHERDATA.TYPE_TEMP_MIN + ""), WeatherDataDO.WEATHERDATA.TYPE_TEMP_MIN);
                         }
                     }
                 }

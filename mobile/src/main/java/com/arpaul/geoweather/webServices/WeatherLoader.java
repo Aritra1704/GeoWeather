@@ -8,9 +8,12 @@ import android.content.OperationApplicationException;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.os.RemoteException;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.content.AsyncTaskLoader;
 
 import com.arpaul.geoweather.R;
+import com.arpaul.geoweather.activity.WeatherListActivity;
 import com.arpaul.geoweather.dataAccess.SSCPConstants;
 import com.arpaul.geoweather.dataObjects.LocationDO;
 import com.arpaul.geoweather.dataObjects.ParserDO;
@@ -18,7 +21,14 @@ import com.arpaul.geoweather.dataObjects.WeatherDataDO;
 import com.arpaul.geoweather.dataObjects.WeatherDescriptionDO;
 import com.arpaul.geoweather.parser.WeatherParser;
 import com.arpaul.utilitieslib.CalendarUtils;
+import com.arpaul.utilitieslib.LogUtils;
 import com.arpaul.utilitieslib.StringUtils;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.wearable.DataApi;
+import com.google.android.gms.wearable.PutDataMapRequest;
+import com.google.android.gms.wearable.PutDataRequest;
+import com.google.android.gms.wearable.Wearable;
 
 import java.util.ArrayList;
 
