@@ -12,10 +12,16 @@ import android.view.WindowInsets;
 
 import com.arpaul.geoweather.R;
 import com.arpaul.geoweather.adapter.GridPagerAdapter;
+import com.arpaul.geoweather.service.WatchService;
+import com.arpaul.utilitieslib.LogUtils;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.wearable.DataApi;
+import com.google.android.gms.wearable.DataEvent;
+import com.google.android.gms.wearable.DataEventBuffer;
+import com.google.android.gms.wearable.DataMap;
+import com.google.android.gms.wearable.DataMapItem;
 import com.google.android.gms.wearable.PutDataMapRequest;
 import com.google.android.gms.wearable.PutDataRequest;
 import com.google.android.gms.wearable.Wearable;
@@ -30,6 +36,9 @@ public class WeatherWatchActivity extends Activity implements
     GoogleApiClient mGoogleApiClient;
     private GridViewPager pager;
     private DotsPageIndicator page_indicator;
+
+    private static final String TAG = WeatherWatchActivity.class.getSimpleName();
+    //https://github.com/hemal-shah/Sunshine/blob/master/Wear/src/main/java/hemal/mukesh/shah/sunshine/MyWatchFace.java
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,7 +88,22 @@ public class WeatherWatchActivity extends Activity implements
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
-
+        LogUtils.infoLog(TAG, "onConnected: ");
+        Wearable.DataApi.addListener(mGoogleApiClient, new DataApi.DataListener(){
+            @Override
+            public void onDataChanged(DataEventBuffer dataEventBuffer) {
+                for(DataEvent dataEvent : dataEventBuffer){
+                    if(dataEvent.getType() == DataEvent.TYPE_CHANGED){
+                        DataMap dataMap = DataMapItem.fromDataItem(dataEvent.getDataItem()).getDataMap();
+                        String path = dataEvent.getDataItem().getUri().getPath();
+                        if(path.equals("/weather")){
+                            double high = dataMap.getDouble("high");
+                            double low = dataMap.getDouble("low");
+                        }
+                    }
+                }
+            }
+        });
     }
 
     @Override
