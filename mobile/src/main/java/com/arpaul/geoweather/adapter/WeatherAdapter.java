@@ -75,7 +75,6 @@ public class WeatherAdapter extends RecyclerView.Adapter<WeatherAdapter.ViewHold
                 intentService.putExtra("TodayWeather", objWeatherDO);
                 ((Activity)context).startService(intentService);
 
-
                 if (((WeatherListActivity)context).mTwoPane) {
                     Bundle arguments = new Bundle();
                     arguments.putSerializable("WEATHER_DETAIL",objWeatherDO);

@@ -28,6 +28,8 @@ public class WeatherDataDO extends BaseDO {
     private double clouds = 0;
     private double rain = 0;
 
+    private String icon = "";
+
     public ArrayList<WeatherDescriptionDO> arrWeatheDescp = new ArrayList<>();
 
     public void saveData(Object data, WEATHERDATA type){
@@ -86,6 +88,9 @@ public class WeatherDataDO extends BaseDO {
             case TYPE_RAIN:
                 rain = (double)data;
                 break;
+            case TYPE_ICON:
+                icon = (String) data;
+                break;
         }
     }
 
@@ -127,6 +132,8 @@ public class WeatherDataDO extends BaseDO {
                 return clouds;
             case TYPE_RAIN:
                 return rain;
+            case TYPE_ICON:
+                return icon;
             default:
                 return dt;
         }
@@ -180,7 +187,8 @@ public class WeatherDataDO extends BaseDO {
         TYPE_WIND,
         TYPE_DEG,
         TYPE_CLOUDS,
-        TYPE_RAIN
+        TYPE_RAIN,
+        TYPE_ICON
     }
 
     public static final String _ID              = "_ID";

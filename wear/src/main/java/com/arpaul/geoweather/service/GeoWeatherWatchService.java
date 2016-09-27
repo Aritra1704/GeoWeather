@@ -28,9 +28,11 @@ import android.widget.Toast;
 import com.arpaul.geoweather.R;
 import com.arpaul.geoweather.common.WearableConstants;
 import com.arpaul.geoweather.dataObjects.WeatherDataDO;
+import com.arpaul.geoweather.dataObjects.WeatherDescriptionDO;
 import com.arpaul.utilitieslib.CalendarUtils;
 import com.arpaul.utilitieslib.ColorUtils;
 import com.arpaul.utilitieslib.LogUtils;
+import com.arpaul.utilitieslib.StringUtils;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
@@ -172,6 +174,7 @@ public class GeoWeatherWatchService extends CanvasWatchFaceService {
 
                         objWeatherDataDO.saveData(dataMap.getDouble(WeatherDataDO.WEATHERDATA.TYPE_TEMP_MAX + ""), WeatherDataDO.WEATHERDATA.TYPE_TEMP_MAX);
                         objWeatherDataDO.saveData(dataMap.getDouble(WeatherDataDO.WEATHERDATA.TYPE_TEMP_MIN + ""), WeatherDataDO.WEATHERDATA.TYPE_TEMP_MIN);
+                        objWeatherDataDO.saveData(dataMap.getString(WeatherDescriptionDO.WEATHER_DESC_DATA.TYPE_ICON + ""), WeatherDataDO.WEATHERDATA.TYPE_ICON);
 
                     }
                 }
@@ -305,6 +308,8 @@ public class GeoWeatherWatchService extends CanvasWatchFaceService {
 
                 String textMin = degreeFormat.format((double) objWeatherDataDO.getData(WeatherDataDO.WEATHERDATA.TYPE_TEMP_MIN)) + (char) 0x00B0;
                 canvas.drawText(textMin, xOffset, yOffsetMin, mTextPaintDate);
+
+//                holder.ivWeather.setImageResource(AppConstants.getArtResourceForWeatherCondition(StringUtils.getInt(icon)));
             }
         }
 
