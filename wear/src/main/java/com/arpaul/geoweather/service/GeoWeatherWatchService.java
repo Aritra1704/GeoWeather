@@ -296,6 +296,15 @@ public class GeoWeatherWatchService extends CanvasWatchFaceService {
 
             canvas.drawLine(0, height/2, width, height/2, linePaint);
 
+            //Remove later
+            objWeatherDataDO = new WeatherDataDO();
+            objWeatherDataDO.saveData(StringUtils.getLong("1475044976417"), WeatherDataDO.WEATHERDATA.TYPE_DATE_MILIS);
+
+            objWeatherDataDO.saveData(StringUtils.getDouble("29.57"), WeatherDataDO.WEATHERDATA.TYPE_TEMP_MAX);
+            objWeatherDataDO.saveData(StringUtils.getDouble("21.71"), WeatherDataDO.WEATHERDATA.TYPE_TEMP_MIN);
+            objWeatherDataDO.saveData("800", WeatherDataDO.WEATHERDATA.TYPE_ICON);
+
+
             if(objWeatherDataDO != null){
                 String text = CalendarUtils.getDatefromTimeinMilliesPattern((long) objWeatherDataDO.getData(WeatherDataDO.WEATHERDATA.TYPE_DATE_MILIS), WearableConstants.DATE_PATTERN_WEEKNAME_FORMAT);
                 canvas.drawText(text, xOffset, yOffset, mTextPaint);

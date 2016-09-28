@@ -57,9 +57,9 @@ public class SendWearableDataService extends Service implements
     public int onStartCommand(Intent intent, int flags, int startId) {
 
         mGoogleApiClient = new GoogleApiClient.Builder(SendWearableDataService.this)
+                .addApi(Wearable.API)
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
-                .addApi(Wearable.API)
                 .build();
 
         mGoogleApiClient.connect();
