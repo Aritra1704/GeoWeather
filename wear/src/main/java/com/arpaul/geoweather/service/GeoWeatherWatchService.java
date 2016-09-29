@@ -103,6 +103,7 @@ public class GeoWeatherWatchService extends CanvasWatchFaceService {
         final Handler mUpdateTimeHandler = new EngineHandler(this);
         Context context;
         Paint mBackgroundPaint, linePaint;
+        Paint mTPTimeHigh;
         Paint mTPDayHigh;
         Paint mTPMaxHigh;
         Paint mTPMinHigh;
@@ -110,7 +111,7 @@ public class GeoWeatherWatchService extends CanvasWatchFaceService {
         Bitmap mWeatherIcon;
         public int text_pattern = 0;
         public DecimalFormat degreeFormat;
-        float xOffset, xOffsetMax, xOffsetMin, yOffsetDay, yOffsetDate, yOffsetMax, yOffsetMin, yOffsetIcon, yOffsetSkyCond;
+        float xOffset, xOffsetMax, xOffsetMin, yOffsetTime, yOffsetDay, yOffsetDate, yOffsetMax, yOffsetMin, yOffsetIcon, yOffsetSkyCond;
         private static final String WEATHER_PATH = "/weather";
 
         GoogleApiClient mGoogleApiClient = new GoogleApiClient.Builder(GeoWeatherWatchService.this)
@@ -151,6 +152,7 @@ public class GeoWeatherWatchService extends CanvasWatchFaceService {
             mBackgroundPaint.setColor(setBgColor);
             mBackgroundBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.sp_event_icon);
 
+            mTPTimeHigh = createTextPaint(setTextColor);
             mTPDayHigh = createTextPaint(setTextColor);
             mTPMaxHigh = createTextPaint(setTextColor);
             mTPMinHigh = createTextPaint(setTextColor);
@@ -277,12 +279,14 @@ public class GeoWeatherWatchService extends CanvasWatchFaceService {
             Resources resources = GeoWeatherWatchService.this.getResources();
             boolean isRound = insets.isRound();
 
-            float tsDay = resources.getDimension(isRound ? R.dimen.margin_18 : R.dimen.margin_16);
+            float tsTime = resources.getDimension(isRound ? R.dimen.margin_18 : R.dimen.margin_16);
+            float tsDay = resources.getDimension(isRound ? R.dimen.margin_16 : R.dimen.margin_14);
             float tsMax = resources.getDimension(isRound ? R.dimen.margin_25 : R.dimen.margin_20);
             float tsMin = resources.getDimension(isRound ? R.dimen.margin_16 : R.dimen.margin_14);
             float tsLowAmbient = resources.getDimension(isRound ? R.dimen.margin_14 : R.dimen.margin_12);
 
-            yOffsetDay = resources.getDimension(R.dimen.margin_20);
+            yOffsetTime = resources.getDimension(R.dimen.margin_10);
+            yOffsetDay = resources.getDimension(R.dimen.margin_30);
             yOffsetDate = yOffsetDay;
             yOffsetMax = resources.getDimension(R.dimen.margin_30);
             yOffsetMin = yOffsetMax + resources.getDimension(R.dimen.margin_20);
@@ -293,6 +297,7 @@ public class GeoWeatherWatchService extends CanvasWatchFaceService {
             xOffsetMax = xOffset + 20;
             xOffsetMin = xOffsetMax + 10;
 
+            mTPTimeHigh.setTextSize(tsTime);
             mTPDayHigh.setTextSize(tsDay);
             mTPMaxHigh.setTextSize(tsMax);
             mTPMinHigh.setTextSize(tsMin);
@@ -324,12 +329,18 @@ public class GeoWeatherWatchService extends CanvasWatchFaceService {
                 String textMax = degreeFormat.format((double) objWeatherDataDO.getData(WeatherDataDO.WEATHERDATA.TYPE_TEMP_MAX)) + (char) 0x00B0;
                 String textMin = degreeFormat.format((double) objWeatherDataDO.getData(WeatherDataDO.WEATHERDATA.TYPE_TEMP_MIN)) + (char) 0x00B0;
 
+                String current_time = CalendarUtils.getDateinPattern(CalendarUtils.TIME_FORMAT);
+
                 float iconDimen = (int) getResources().getDimension(R.dimen.margin_70);
                 int xDayPos = (width / 2);
                 if (mAmbient) {
                     float lowTextDateLen = mTextLowAmbientPaint.measureText(day + ", " + date);
                     float lowTextTempLen = mTextLowAmbientPaint.measureText(textMax + " / " + textMin);
                     canvas.drawText(day + ", " + date, xDayPos - lowTextDateLen/2, height/2 - yOffsetDay, mTextLowAmbientPaint);
+
+                    float lowTextCurTimeLen = mTextLowAmbientPaint.measureText(current_time);
+                    canvas.drawText(current_time, xDayPos - lowTextCurTimeLen/2, height/2 - yOffsetTime, mTextLowAmbientPaint);
+
                     canvas.drawText(textMax + " / " + textMin, xDayPos - lowTextTempLen/2, height/2 + yOffsetMax, mTextLowAmbientPaint);
                     if(objWeatherDataDO != null && objWeatherDataDO.arrWeatheDescp != null && objWeatherDataDO.arrWeatheDescp.size() > 0){
                         String skyCondition = (String) objWeatherDataDO.arrWeatheDescp.get(0).getData(WeatherDescriptionDO.WEATHER_DESC_DATA.TYPE_MAIN);
@@ -338,7 +349,11 @@ public class GeoWeatherWatchService extends CanvasWatchFaceService {
                     }
                 } else {
                     float lowTextLen = mTPDayHigh.measureText(day + ", " + date);
-                    canvas.drawText(day + ", " + date, xDayPos - lowTextLen/2, height/2 -yOffsetDay, mTPDayHigh);
+                    canvas.drawText(day + ", " + date, xDayPos - lowTextLen/2, height/2 - yOffsetDay, mTPDayHigh);
+
+                    float lowTextCurTimeLen = mTPTimeHigh.measureText(current_time);
+                    canvas.drawText(current_time, xDayPos - lowTextCurTimeLen/2, height/2 - yOffsetTime, mTPTimeHigh);
+
                     canvas.drawText(textMax, xOffsetMax, height/2 + yOffsetMax, mTPMaxHigh);
                     canvas.drawText(textMin, xOffsetMin, height/2 + yOffsetMin, mTPMinHigh);
 
