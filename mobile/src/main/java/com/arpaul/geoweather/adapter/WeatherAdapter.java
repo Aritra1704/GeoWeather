@@ -20,7 +20,7 @@ import com.arpaul.geoweather.common.AppConstants;
 import com.arpaul.geoweather.dataObjects.WeatherDataDO;
 import com.arpaul.geoweather.dataObjects.WeatherDescriptionDO;
 import com.arpaul.geoweather.fragments.ItemWeatherDetailFragment;
-import com.arpaul.geoweather.webServices.SendWearableDataService;
+import com.arpaul.geoweather.wearableService.SendWearableDataService;
 import com.arpaul.utilitieslib.CalendarUtils;
 import com.arpaul.utilitieslib.StringUtils;
 

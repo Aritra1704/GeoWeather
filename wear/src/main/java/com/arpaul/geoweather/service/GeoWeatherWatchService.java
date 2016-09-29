@@ -1,6 +1,5 @@
 package com.arpaul.geoweather.service;
 
-import android.app.Notification;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -13,11 +12,12 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Typeface;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.wearable.watchface.CanvasWatchFaceService;
 import android.support.wearable.watchface.WatchFaceStyle;
 import android.util.Log;
@@ -49,9 +49,6 @@ import com.google.android.gms.wearable.Wearable;
 import java.lang.ref.WeakReference;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.TimeZone;
 import java.util.UUID;
 
 /**
@@ -105,10 +102,15 @@ public class GeoWeatherWatchService extends CanvasWatchFaceService {
 
         final Handler mUpdateTimeHandler = new EngineHandler(this);
         Context context;
-        Paint mBackgroundPaint, mTextPaint, mTextPaintDate, linePaint;
+        Paint mBackgroundPaint, linePaint;
+        Paint mTPDayHigh;
+        Paint mTPMaxHigh;
+        Paint mTPMinHigh;
+        Paint mTextLowAmbientPaint;
+        Bitmap mWeatherIcon;
         public int text_pattern = 0;
         public DecimalFormat degreeFormat;
-        float xOffset, yOffset, yOffsetDate, yOffsetMax, yOffsetMin;
+        float xOffset, xOffsetMax, xOffsetMin, yOffsetDay, yOffsetDate, yOffsetMax, yOffsetMin, yOffsetIcon, yOffsetSkyCond;
         private static final String WEATHER_PATH = "/weather";
 
         GoogleApiClient mGoogleApiClient = new GoogleApiClient.Builder(GeoWeatherWatchService.this)
@@ -137,23 +139,23 @@ public class GeoWeatherWatchService extends CanvasWatchFaceService {
                     .build());
 
             int setBgColor = setupBaseView();
-            int setTextColor = 0;
+            int setTextColor = ColorUtils.getColor(context, R.color.colorWhite);
             if(text_pattern == WearableConstants.TEXT_PATTERN_DARK)
                 setTextColor = ColorUtils.getColor(context, R.color.colorBlack);
+            else if(text_pattern == WearableConstants.TEXT_PATTERN_NOON)
+                setTextColor = ColorUtils.getColor(context, R.color.colorAccent);
             else
                 setTextColor = ColorUtils.getColor(context, R.color.colorWhite);
-
-            yOffset = resources.getDimension(R.dimen.margin_70);
-            yOffsetDate = resources.getDimension(R.dimen.margin_90);
-            yOffsetMax = resources.getDimension(R.dimen.margin_110);
-            yOffsetMin = resources.getDimension(R.dimen.margin_130);
 
             mBackgroundPaint = new Paint();
             mBackgroundPaint.setColor(setBgColor);
             mBackgroundBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.sp_event_icon);
 
-            mTextPaint = createTextPaint(setTextColor/*ColorUtils.getColor(context, R.color.digital_text)*/);
-            mTextPaintDate = createTextPaint(setTextColor);
+            mTPDayHigh = createTextPaint(setTextColor);
+            mTPMaxHigh = createTextPaint(setTextColor);
+            mTPMinHigh = createTextPaint(setTextColor);
+
+            mTextLowAmbientPaint = createTextPaint(ColorUtils.getColor(context, R.color.colorWhite));
 
             linePaint = new Paint();
             linePaint.setColor(setTextColor);
@@ -174,7 +176,12 @@ public class GeoWeatherWatchService extends CanvasWatchFaceService {
 
                         objWeatherDataDO.saveData(dataMap.getDouble(WeatherDataDO.WEATHERDATA.TYPE_TEMP_MAX + ""), WeatherDataDO.WEATHERDATA.TYPE_TEMP_MAX);
                         objWeatherDataDO.saveData(dataMap.getDouble(WeatherDataDO.WEATHERDATA.TYPE_TEMP_MIN + ""), WeatherDataDO.WEATHERDATA.TYPE_TEMP_MIN);
-                        objWeatherDataDO.saveData(dataMap.getString(WeatherDescriptionDO.WEATHER_DESC_DATA.TYPE_ICON + ""), WeatherDataDO.WEATHERDATA.TYPE_ICON);
+
+                        WeatherDescriptionDO objWeatherDescriptionDO = new WeatherDescriptionDO();
+                        objWeatherDescriptionDO.saveData(dataMap.getString(WeatherDescriptionDO.WEATHER_DESC_DATA.TYPE_ICON + ""), WeatherDescriptionDO.WEATHER_DESC_DATA.TYPE_ICON);
+                        objWeatherDescriptionDO.saveData(dataMap.getString(WeatherDescriptionDO.WEATHER_DESC_DATA.TYPE_MAIN + ""), WeatherDescriptionDO.WEATHER_DESC_DATA.TYPE_MAIN);
+
+                        objWeatherDataDO.arrWeatheDescp.add(objWeatherDescriptionDO);
 
                     }
                 }
@@ -269,15 +276,27 @@ public class GeoWeatherWatchService extends CanvasWatchFaceService {
             // Load resources that have alternate values for round watches.
             Resources resources = GeoWeatherWatchService.this.getResources();
             boolean isRound = insets.isRound();
-            float textSize = resources.getDimension(isRound
-                    ? R.dimen.digital_text_size_round : R.dimen.digital_text_size);
 
-            xOffset = resources.getDimension(
-                    isRound ? R.dimen.digital_x_offset_round : R.dimen.digital_x_offset);
+            float tsDay = resources.getDimension(isRound ? R.dimen.margin_18 : R.dimen.margin_16);
+            float tsMax = resources.getDimension(isRound ? R.dimen.margin_25 : R.dimen.margin_20);
+            float tsMin = resources.getDimension(isRound ? R.dimen.margin_16 : R.dimen.margin_14);
+            float tsLowAmbient = resources.getDimension(isRound ? R.dimen.margin_14 : R.dimen.margin_12);
 
+            yOffsetDay = resources.getDimension(R.dimen.margin_20);
+            yOffsetDate = yOffsetDay;
+            yOffsetMax = resources.getDimension(R.dimen.margin_30);
+            yOffsetMin = yOffsetMax + resources.getDimension(R.dimen.margin_20);
+            yOffsetSkyCond = yOffsetMin + resources.getDimension(R.dimen.margin_30);
+            yOffsetIcon = resources.getDimension(R.dimen.margin_190);
 
-            mTextPaintDate.setTextSize(textSize - 15);
-            mTextPaint.setTextSize(textSize);
+            xOffset = resources.getDimension(isRound ? R.dimen.margin_30 : R.dimen.margin_25);
+            xOffsetMax = xOffset + 20;
+            xOffsetMin = xOffsetMax + 10;
+
+            mTPDayHigh.setTextSize(tsDay);
+            mTPMaxHigh.setTextSize(tsMax);
+            mTPMinHigh.setTextSize(tsMin);
+            mTextLowAmbientPaint.setTextSize(tsLowAmbient);
         }
 
         @Override
@@ -297,6 +316,56 @@ public class GeoWeatherWatchService extends CanvasWatchFaceService {
             canvas.drawLine(0, height/2, width, height/2, linePaint);
 
             //Remove later
+            setDummyData();
+
+            if(objWeatherDataDO != null){
+                String day = CalendarUtils.getDatefromTimeinMilliesPattern((long) objWeatherDataDO.getData(WeatherDataDO.WEATHERDATA.TYPE_DATE_MILIS), WearableConstants.DATE_PATTERN_WEEKNAME_FORMAT);
+                String date = CalendarUtils.getDatefromTimeinMilliesPattern((long) objWeatherDataDO.getData(WeatherDataDO.WEATHERDATA.TYPE_DATE_MILIS), WearableConstants.DATE_PATTERN_WEATHER_DETAIL);
+                String textMax = degreeFormat.format((double) objWeatherDataDO.getData(WeatherDataDO.WEATHERDATA.TYPE_TEMP_MAX)) + (char) 0x00B0;
+                String textMin = degreeFormat.format((double) objWeatherDataDO.getData(WeatherDataDO.WEATHERDATA.TYPE_TEMP_MIN)) + (char) 0x00B0;
+
+                float iconDimen = (int) getResources().getDimension(R.dimen.margin_70);
+                int xDayPos = (width / 2);
+                if (mAmbient) {
+                    float lowTextDateLen = mTextLowAmbientPaint.measureText(day + ", " + date);
+                    float lowTextTempLen = mTextLowAmbientPaint.measureText(textMax + " / " + textMin);
+                    canvas.drawText(day + ", " + date, xDayPos - lowTextDateLen/2, height/2 - yOffsetDay, mTextLowAmbientPaint);
+                    canvas.drawText(textMax + " / " + textMin, xDayPos - lowTextTempLen/2, height/2 + yOffsetMax, mTextLowAmbientPaint);
+                    if(objWeatherDataDO != null && objWeatherDataDO.arrWeatheDescp != null && objWeatherDataDO.arrWeatheDescp.size() > 0){
+                        String skyCondition = (String) objWeatherDataDO.arrWeatheDescp.get(0).getData(WeatherDescriptionDO.WEATHER_DESC_DATA.TYPE_MAIN);
+                        float highTextLen = mTPMinHigh.measureText(skyCondition);
+                        canvas.drawText(skyCondition, xDayPos - highTextLen/2, height/2 + yOffsetMax + 50, mTextLowAmbientPaint);
+                    }
+                } else {
+                    float lowTextLen = mTPDayHigh.measureText(day + ", " + date);
+                    canvas.drawText(day + ", " + date, xDayPos - lowTextLen/2, height/2 -yOffsetDay, mTPDayHigh);
+                    canvas.drawText(textMax, xOffsetMax, height/2 + yOffsetMax, mTPMaxHigh);
+                    canvas.drawText(textMin, xOffsetMin, height/2 + yOffsetMin, mTPMinHigh);
+
+                    if(objWeatherDataDO != null && objWeatherDataDO.arrWeatheDescp != null && objWeatherDataDO.arrWeatheDescp.size() > 0){
+
+                        //Icon
+                        String iconid = (String) objWeatherDataDO.arrWeatheDescp.get(0).getData(WeatherDescriptionDO.WEATHER_DESC_DATA.TYPE_ICON);
+                        Drawable b = getResources().getDrawable(WearableConstants.getArtResourceForWeatherCondition(StringUtils.getInt(iconid)));
+                        Bitmap icon = null;
+                        if (((BitmapDrawable) b) != null) {
+                            icon = ((BitmapDrawable) b).getBitmap();
+                        }
+                        mWeatherIcon = Bitmap.createScaledBitmap(icon, (int) iconDimen, (int) iconDimen, true);
+                        float iconXOffset = xOffset + (int) getResources().getDimension(R.dimen.margin_70);
+                        canvas.drawBitmap(mWeatherIcon, iconXOffset, height/2, null);
+
+                        String skyCondition = (String) objWeatherDataDO.arrWeatheDescp.get(0).getData(WeatherDescriptionDO.WEATHER_DESC_DATA.TYPE_MAIN);
+                        float highTextLen = mTPMinHigh.measureText(skyCondition);
+                        canvas.drawText(skyCondition, xDayPos - highTextLen/2, height/2 + yOffsetSkyCond, mTPMinHigh);
+                    }
+                }
+//                holder.ivWeather.setImageResource(AppConstants.getArtResourceForWeatherCondition(StringUtils.getInt(icon)));
+            }
+        }
+
+        private void setDummyData(){
+
             objWeatherDataDO = new WeatherDataDO();
             objWeatherDataDO.saveData(StringUtils.getLong("1475044976417"), WeatherDataDO.WEATHERDATA.TYPE_DATE_MILIS);
 
@@ -304,22 +373,11 @@ public class GeoWeatherWatchService extends CanvasWatchFaceService {
             objWeatherDataDO.saveData(StringUtils.getDouble("21.71"), WeatherDataDO.WEATHERDATA.TYPE_TEMP_MIN);
             objWeatherDataDO.saveData("800", WeatherDataDO.WEATHERDATA.TYPE_ICON);
 
+            WeatherDescriptionDO objWeatherDescriptionDO = new WeatherDescriptionDO();
+            objWeatherDescriptionDO.saveData("800", WeatherDescriptionDO.WEATHER_DESC_DATA.TYPE_ICON);
+            objWeatherDescriptionDO.saveData("Clear Sky", WeatherDescriptionDO.WEATHER_DESC_DATA.TYPE_MAIN);
 
-            if(objWeatherDataDO != null){
-                String text = CalendarUtils.getDatefromTimeinMilliesPattern((long) objWeatherDataDO.getData(WeatherDataDO.WEATHERDATA.TYPE_DATE_MILIS), WearableConstants.DATE_PATTERN_WEEKNAME_FORMAT);
-                canvas.drawText(text, xOffset, yOffset, mTextPaint);
-
-                String date = CalendarUtils.getDatefromTimeinMilliesPattern((long) objWeatherDataDO.getData(WeatherDataDO.WEATHERDATA.TYPE_DATE_MILIS), WearableConstants.DATE_PATTERN_WEATHER_DETAIL);
-                canvas.drawText(date, xOffset, yOffsetDate, mTextPaintDate);
-
-                String textMax = degreeFormat.format((double) objWeatherDataDO.getData(WeatherDataDO.WEATHERDATA.TYPE_TEMP_MAX)) + (char) 0x00B0;
-                canvas.drawText(textMax, xOffset, yOffsetMax, mTextPaint);
-
-                String textMin = degreeFormat.format((double) objWeatherDataDO.getData(WeatherDataDO.WEATHERDATA.TYPE_TEMP_MIN)) + (char) 0x00B0;
-                canvas.drawText(textMin, xOffset, yOffsetMin, mTextPaintDate);
-
-//                holder.ivWeather.setImageResource(AppConstants.getArtResourceForWeatherCondition(StringUtils.getInt(icon)));
-            }
+            objWeatherDataDO.arrWeatheDescp.add(objWeatherDescriptionDO);
         }
 
         boolean mLowBitAmbient;
@@ -336,7 +394,7 @@ public class GeoWeatherWatchService extends CanvasWatchFaceService {
             if (mAmbient != inAmbientMode) {
                 mAmbient = inAmbientMode;
                 if (mLowBitAmbient) {
-                    mTextPaint.setAntiAlias(!inAmbientMode);
+                    mTPDayHigh.setAntiAlias(!inAmbientMode);
                 }
                 invalidate();
             }
@@ -405,7 +463,7 @@ public class GeoWeatherWatchService extends CanvasWatchFaceService {
                 text_pattern = WearableConstants.TEXT_PATTERN_DARK;
                 setColor = ColorUtils.getColor(context, R.color.colorMorning);
             } else if(CalendarUtils.getDiffBtwDatesPattern(noonTime, currentTime, CalendarUtils.DIFF_TYPE.TYPE_MINUTE, CalendarUtils.TIME_FORMAT) < 0){
-                text_pattern = WearableConstants.TEXT_PATTERN_DARK;
+                text_pattern = WearableConstants.TEXT_PATTERN_NOON;
                 setColor = ColorUtils.getColor(context, R.color.colorNoon);
             } else if(CalendarUtils.getDiffBtwDatesPattern(eveningTime, currentTime, CalendarUtils.DIFF_TYPE.TYPE_MINUTE, CalendarUtils.TIME_FORMAT) < 0){
                 text_pattern = WearableConstants.TEXT_PATTERN_LIGHT;

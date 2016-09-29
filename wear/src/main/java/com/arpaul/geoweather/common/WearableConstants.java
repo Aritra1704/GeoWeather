@@ -13,6 +13,7 @@ public class WearableConstants {
 
     public final static int TEXT_PATTERN_LIGHT = 1;
     public final static int TEXT_PATTERN_DARK = 2;
+    public final static int TEXT_PATTERN_NOON = 3;
 
     /**
      * Helper method to provide the art resource id according to the weather condition id returned

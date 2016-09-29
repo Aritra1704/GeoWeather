@@ -1,6 +1,5 @@
-package com.arpaul.geoweather.webServices;
+package com.arpaul.geoweather.wearableService;
 
-import android.app.IntentService;
 import android.app.Service;
 import android.content.Intent;
 import android.database.Cursor;
@@ -9,7 +8,6 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.content.CursorLoader;
 
 import com.arpaul.geoweather.dataAccess.SSCPConstants;
 import com.arpaul.geoweather.dataObjects.LocationDO;
@@ -187,7 +185,9 @@ public class SendWearableDataService extends Service implements
             dataMap.getDataMap().putDouble(WeatherDataDO.WEATHERDATA.TYPE_TEMP_MIN + "", (double) objWeatherDO.getData(WeatherDataDO.WEATHERDATA.TYPE_TEMP_MIN));
 
             String icon = (String) objWeatherDO.arrWeatheDescp.get(0).getData(WeatherDescriptionDO.WEATHER_DESC_DATA.TYPE_ICON);
+            String main = (String) objWeatherDO.arrWeatheDescp.get(0).getData(WeatherDescriptionDO.WEATHER_DESC_DATA.TYPE_MAIN);
             dataMap.getDataMap().putString(WeatherDescriptionDO.WEATHER_DESC_DATA.TYPE_ICON + "", icon);
+            dataMap.getDataMap().putString(WeatherDescriptionDO.WEATHER_DESC_DATA.TYPE_MAIN + "", main);
 
             PutDataRequest request = dataMap.asPutDataRequest();
             DataApi.DataItemResult dataItemResult = Wearable.DataApi.putDataItem(mGoogleApiClient, request).await();
